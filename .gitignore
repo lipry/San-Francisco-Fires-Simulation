@@ -1,5 +1,6 @@
 reated by https://www.gitignore.io/api/python,jupyternotebook
 .DS_Store
+.swp
 *.csv
 *.xlsx
 ### JupyterNotebook ###
