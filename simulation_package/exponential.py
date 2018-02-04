@@ -1,7 +1,9 @@
 import numpy as np
 from scipy import random
+from .distribution import Distribution
 
-class Exponential:
+
+class Exponential(Distribution):
 
     def __init__(self, l):
         self.lam = l
