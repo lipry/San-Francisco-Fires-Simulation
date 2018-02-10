@@ -30,6 +30,7 @@ class SFFireSimulation:
     def get_min_time_server(times):
         return min(enumerate(times), key=operator.itemgetter(1))
 
+    #VALUTAARE PERMUTAZIONI AL POSTO CHE RAND
     def simulate(self):
         #init utility variables
         fires_exp = Exponential(1 / 1050.73914786)
@@ -103,4 +104,56 @@ class SFFireSimulation:
         simulated_fire = simulated_fire[0:len(D_hour)]
         simulated_fire['(A) Alarm DateTime'] = A_hour[0:len(D_hour)]
         simulated_fire['(D) Resolution DateTime'] = D_hour
+        simulated_fire['A (in sec)'] = A[0:len(D_hour)]
+        simulated_fire['D (in sec)'] = D
+        simulated_fire['diff'] = simulated_fire['D (in sec)'] - simulated_fire['A (in sec)']
         return simulated_fire
+
+    def simulate_only_times(self):
+        # init utility variables
+        fires_exp = Exponential(1 / 1050.73914786)
+        server_service_exp = Exponential(1 / 1050.7392199)
+        # init variables
+        # Time variable
+        t = 0
+        # System State variables (SS)
+        n_live_fires = 0
+        SS = [0 for _ in range(self.N_servers)]
+        # Counter variables
+        Na = 0
+        C = [0 for _ in range(self.N_servers)]
+        A = []
+        D = []
+        # Event list
+        Tserver = [math.inf for _ in range(self.N_servers)]
+
+        Ta = fires_exp.random()
+        while t < self.simulation_days * 86400:
+            if Ta <= min(Ta, *Tserver):
+                # the next events is a fire
+                t = Ta
+                Na += 1
+                Ta = t + fires_exp.random()
+                A.append(t)
+                n_live_fires += 1
+                if n_live_fires <= self.N_servers:
+                    i = self.find_first_empty_server(SS)
+                    SS[i] = Na
+                    Tserver[i] = t + server_service_exp.random()
+            else:
+                # the next events is an intervention end
+                min_time_ix, min_time = self.get_min_time_server(Tserver)
+                t = Tserver[min_time_ix]
+                C[min_time_ix] += 1
+                D.append(t)
+                if n_live_fires <= self.N_servers:
+                    SS[min_time_ix] = 0
+                    Tserver[min_time_ix] = math.inf
+                else:
+                    SS[min_time_ix] += 1
+                    Tserver[min_time_ix] = t + server_service_exp.random()
+                n_live_fires -= 1
+
+        A = A[0:len(D)]
+
+        return np.array(D)-np.array(A)
