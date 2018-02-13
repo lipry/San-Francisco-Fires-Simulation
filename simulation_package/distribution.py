@@ -4,15 +4,21 @@ import numpy as np
 
 class Distribution(ABC):
 
-    def __init__(self):
-        pass
+    def __init__(self, varred=True):
+        self.varred = varred
 
     @abstractmethod
-    def random(self):
+    def random(self, u):
         pass
 
     def rvs(self, n):
-        return [self.random() for _ in range(0, n)]
+        u = np.random.uniform(0, 1, int(np.floor(n)))
+        first = [self.random(x) for x in list(u)]
+        if self.varred:
+            second = [self.random(1-x) for x in list(u)]
+            return first+second
+
+        return first
 
     def cdf(self, n):
         data = self.rvs(n)

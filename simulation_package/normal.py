@@ -6,16 +6,15 @@ import math
 
 class Normal(Distribution):
 
-    #idea buffer
-
     def __init__(self, mu=0.0, variance=1.0, t="bm", log=False):
+        super(Normal, self).__init__(varred=False)
         self.mu = mu
         self.sigma = np.sqrt(variance)
         self.technique = t
         self.log = log
         self.buffer = []
 
-    def random(self):
+    def random(self, u=0):
         z = self.general_normal()
         if self.log:
             return np.exp(z)

@@ -11,5 +11,5 @@ class Gamma(Distribution):
 
     # generate a random value from a gamma distribution,
     # the formula was derived using the integral transformation technique
-    def random(self):
+    def random(self, u):
         return -(1/self.lam)*np.log(np.prod(np.random.uniform(size=self.n)))
